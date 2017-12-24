@@ -177,6 +177,7 @@
       addField: function() {
          this.numFields++;
          this.assignments.push(new Object());
+         this.$store.commit('setSaveAssignments', this.assignments);
       },
       edit: function() {
         if (this.modeName === "Edit") {
@@ -198,6 +199,7 @@
         this.progress = 100 - this.hundred;
 
         this.$store.commit('setSaveHundred', this.hundred);
+        this.$store.commit('setSaveAssignments', this.assignments);
       },
       storeTempValue(index) {
         if (isNaN(parseInt(this.assignments[index].aPercent))) {
@@ -212,6 +214,7 @@
         this.updateHundred(index);
         this.assignments.splice(index, 1);
         this.numFields--;
+        this.$store.commit('setSaveAssignments', this.assignments);
       },
       setName() {
         this.$store.commit('setSaveClassName', this.className);

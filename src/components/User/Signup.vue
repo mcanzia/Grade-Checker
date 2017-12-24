@@ -87,8 +87,8 @@ export default {
     onSignup() {
       this.$store.dispatch('signUserUp', {email: this.email, password: this.password})
     },
-    onGoogleSignup() {
-      this.$store.dispatch('googleSignUp', )
+    onGoogleSignup(googleUser) {
+      this.$store.dispatch('googleSignUp', googleUser)
     },
     onDismissed() {
       this.$store.dispatch('clearError')

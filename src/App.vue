@@ -3,6 +3,7 @@
     <router-view></router-view>
     <v-toolbar fixed app :clipped-left="clipped" color="light-green lighten-2">
       <v-toolbar-items>
+      <v-btn flat v-if="userIsAuthenticated && !addClassMode" @click='logout'>Logout</v-btn>
       <v-btn flat v-for="item in toolbarItems" :key="item.title" :to="item.link">
         {{item.title}}
       </v-btn>
@@ -12,7 +13,7 @@
       </div>
       <v-toolbar-title v-text="title"></v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn v-if="this.userIsAuthenticated" icon @click.stop="rightDrawer = !rightDrawer">
+      <v-btn v-if="userIsAuthenticated" icon @click.stop="rightDrawer = !rightDrawer">
         <v-icon>menu</v-icon>
       </v-btn>
     </v-toolbar>
@@ -23,6 +24,28 @@
 
       </v-container>
     </v-content>
+    <v-navigation-drawer
+      fixed
+      :clipped="clipped"
+      v-model="rightDrawer"
+      right
+      app
+      disable-route-watcher
+      disable-resize-watcher
+      v-if="this.userIsAuthenticated"
+    >
+      <v-list>
+        <v-list-tile
+          value="true"
+          v-for="(item, i) in loadedClasses"
+          :key="i"
+        >
+          <v-list-tile-content>
+            <v-list-tile-title v-text="item.name"></v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-navigation-drawer>
     <v-footer :fixed="fixed" app>
       <span>&copy; 2017</span>
     </v-footer>
@@ -34,16 +57,13 @@
   export default {
     data () {
       return {
-        clipped: false,
-        drawer: true,
-        fixed: false,
 
         isLogin: true,
         addClassMode: false,
         saveError: false,
 
-        miniVariant: false,
-        right: true,
+        fixed: true,
+        clipped: false,
         rightDrawer: false,
         title: 'Grade Checker',
       }
@@ -56,7 +76,6 @@
         ]
         if (this.userIsAuthenticated) {
           toolbarItems = [
-            {title: 'Logout', link: '/'},
             {title: 'Add Class', link: '/add'},
           ]
           if (this.$route.name === 'Add') {
@@ -66,10 +85,15 @@
             this.addClassMode = false;
           }
         }
+        this.rightDrawer = false;
         return toolbarItems
       },
       userIsAuthenticated() {
+        this.rightDrawer = false;
         return this.$store.getters.user !== null && this.$store.getters.user !== undefined
+      },
+      loadedClasses() {
+        return this.$store.getters.loadedClasses;
       }
     },
     methods: {
@@ -81,9 +105,14 @@
       register() {
         this.$router.push( { path: 'signup' } );
       },
+      logout() {
+        this.$store.dispatch('logout')
+        this.$router.push({ path: 'signin' })
+      },
       save() {
         if (this.$store.getters.saveHundred === 0 && this.$store.getters.saveClassName !== "") {
           this.saveError = false;
+          this.$store.dispatch('addNewClass')
           this.$store.dispatch('resetSaveStatus');
           this.$router.push({path: "home"});
         } else {

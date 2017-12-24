@@ -12,10 +12,9 @@ export const store = new Vuex.Store({
         assignments: [
           {
             title: "",
-            percentage: "",
+            percentage: 0,
           }
         ],
-        id: '',
       }
     ],
     user: null,
@@ -23,6 +22,7 @@ export const store = new Vuex.Store({
     error: null,
     saveHundred: 100,
     saveClassName: "",
+    saveAssignments: [],
   },
   mutations: {
     setUser (state, payload) {
@@ -34,25 +34,28 @@ export const store = new Vuex.Store({
     setSaveClassName (state, payload) {
       state.saveClassName = payload
     },
-    setLoading (state, payload) {
-      state.loading = payload
+    setSaveAssignments (state, payload) {
+      state.saveAssignments = payload
     },
     setError (state, payload) {
       state.error = payload
     },
     clearError (state) {
       state.error = null
+    },
+    addNewClass (state, payload) {
+      state.loadedClasses.push(payload)
+    },
+    setLoadedClasses (state, payload) {
+      state.loadedClasses = payload
     }
-
   },
   actions: {
     signUserUp ({commit}, payload) {
-      commit('setLoading', true)
       commit('clearError')
       firebase.auth().createUserWithEmailAndPassword(payload.email, payload.password)
         .then(
           user => {
-            commit('setLoading', false)
             const newUser = {
               id: user.uid,
               registeredClasses: []
@@ -62,19 +65,16 @@ export const store = new Vuex.Store({
         )
         .catch(
           error => {
-            commit('setLoading', false)
             commit('setError', error)
             console.log(error)
           }
         )
     },
     signUserIn ( {commit}, payload) {
-      commit('setLoading', true)
       commit('clearError')
       firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
       .then(
         user => {
-          commit('setLoading', false)
           const newUser = {
             id: user.uid,
             registeredClasses: []
@@ -84,7 +84,6 @@ export const store = new Vuex.Store({
       )
       .catch(
         error => {
-          commit('setLoading', false)
           commit('setError', error)
         }
       )
@@ -110,8 +109,18 @@ export const store = new Vuex.Store({
               var credential = error.credential;
               // ...
             });
+            const newUser = {
+              id: firebaseUser.uid,
+              registeredClasses: []
+            }
+            commit('setUser', newUser)
           } else {
             console.log('User already signed-in Firebase.');
+            const oldUser = {
+              id: firebaseUser.uid,
+              registeredClasses: []
+            }
+            commit('setUser', oldUser)
           }
         });
     },
@@ -128,12 +137,60 @@ export const store = new Vuex.Store({
       }
       return false;
     },
-    resetSaveStatus ({commit}, payload) {
+    resetSaveStatus ({commit}) {
       commit('setSaveHundred', 100)
       commit('setSaveClassName', "")
     },
     clearError ({commit}) {
       commit('clearError')
+    },
+    loadClasses ({commit}) {
+      firebase.database().ref('classes').once('value')
+        .then((data) => {
+          const classes = []
+          const obj = data.val()
+          for (let key in obj) {
+            if (obj[key].userID === this.getters.user.id) {
+              classes.push({
+                id: key,
+                name: obj[key].name,
+                assignments: obj[key].assignments,
+                userID: obj[key].userID,
+              })
+            }
+          }
+          commit('setLoadedClasses', classes)
+        })
+        .catch(
+          (error) => {
+            console.log(error)
+          }
+        )
+    },
+    addNewClass ({commit, getters}) {
+      const newClass = {
+        name: getters.saveClassName,
+        assignments: getters.saveAssignments,
+        userID: getters.user.id
+      }
+      firebase.database().ref('classes').push(newClass)
+        .then((data) => {
+          const key = data.key
+          commit('addNewClass', {
+            ...newClass,
+            id: key
+          })
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    },
+    autoSignIn({commit}, payload) {
+      commit('setUser', {id: payload.uid, registeredClasses: []})
+    },
+    logout({commit}) {
+      firebase.auth().signOut()
+      commit('setUser', null)
     },
   },
   getters: {
@@ -145,9 +202,6 @@ export const store = new Vuex.Store({
     user (state) {
       return state.user
     },
-    loading (state) {
-      return state.loading
-    },
     error (state) {
       return state.error
     },
@@ -156,7 +210,10 @@ export const store = new Vuex.Store({
     },
     saveClassName (state) {
       return state.saveClassName
-    }
+    },
+    saveAssignments (state) {
+      return state.saveAssignments
+    },
     /*
     loadedClass (state) {
       return (classId) => {
