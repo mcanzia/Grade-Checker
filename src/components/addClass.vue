@@ -178,6 +178,7 @@
          this.numFields++;
          this.assignments.push(new Object());
          this.$store.commit('setSaveAssignments', this.assignments);
+         this.$store.commit('setSaveGradeScale', this.gradeScales);
       },
       edit: function() {
         if (this.modeName === "Edit") {
@@ -200,6 +201,7 @@
 
         this.$store.commit('setSaveHundred', this.hundred);
         this.$store.commit('setSaveAssignments', this.assignments);
+        this.$store.commit('setSaveGradeScale', this.gradeScales);
       },
       storeTempValue(index) {
         if (isNaN(parseInt(this.assignments[index].aPercent))) {
@@ -215,6 +217,7 @@
         this.assignments.splice(index, 1);
         this.numFields--;
         this.$store.commit('setSaveAssignments', this.assignments);
+        this.$store.commit('setSaveGradeScale', this.gradeScales);
       },
       setName() {
         this.$store.commit('setSaveClassName', this.className);

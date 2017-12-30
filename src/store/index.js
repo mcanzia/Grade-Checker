@@ -15,6 +15,7 @@ export const store = new Vuex.Store({
             percentage: 0,
           }
         ],
+        gradeScales: [],
       }
     ],
     user: null,
@@ -23,6 +24,8 @@ export const store = new Vuex.Store({
     saveHundred: 100,
     saveClassName: "",
     saveAssignments: [],
+    saveGradeScale: [],
+    currentClassIndex: -1,
   },
   mutations: {
     setUser (state, payload) {
@@ -37,6 +40,9 @@ export const store = new Vuex.Store({
     setSaveAssignments (state, payload) {
       state.saveAssignments = payload
     },
+    setSaveGradeScale (state, payload) {
+      state.saveGradeScale = payload
+    },
     setError (state, payload) {
       state.error = payload
     },
@@ -48,6 +54,9 @@ export const store = new Vuex.Store({
     },
     setLoadedClasses (state, payload) {
       state.loadedClasses = payload
+    },
+    setCurrentClassIndex (state, payload) {
+      state.currentClassIndex = payload
     }
   },
   actions: {
@@ -150,14 +159,15 @@ export const store = new Vuex.Store({
           const classes = []
           const obj = data.val()
           for (let key in obj) {
-            if (obj[key].userID === this.getters.user.id) {
+            //if (obj[key].userID === this.getters.user.id) {
               classes.push({
                 id: key,
                 name: obj[key].name,
                 assignments: obj[key].assignments,
+                gradeScales: obj[key].gradeScales,
                 userID: obj[key].userID,
               })
-            }
+            //}
           }
           commit('setLoadedClasses', classes)
         })
@@ -171,6 +181,7 @@ export const store = new Vuex.Store({
       const newClass = {
         name: getters.saveClassName,
         assignments: getters.saveAssignments,
+        gradeScales: getters.saveGradeScale,
         userID: getters.user.id
       }
       firebase.database().ref('classes').push(newClass)
@@ -214,6 +225,12 @@ export const store = new Vuex.Store({
     saveAssignments (state) {
       return state.saveAssignments
     },
+    saveGradeScale (state) {
+      return state.saveGradeScale
+    },
+    currentClassIndex (state) {
+      return state.currentClassIndex
+    }
     /*
     loadedClass (state) {
       return (classId) => {

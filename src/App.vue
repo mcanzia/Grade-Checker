@@ -39,9 +39,13 @@
           value="true"
           v-for="(item, i) in loadedClasses"
           :key="i"
+          @click="viewClass(i)"
         >
+        <v-list-tile-action>
+          <div>{{ i }}</div>
+        </v-list-tile-action>
           <v-list-tile-content>
-            <v-list-tile-title v-text="item.name"></v-list-tile-title>
+            <v-list-tile-title>{{ item.name }}</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
@@ -118,6 +122,10 @@
         } else {
           this.saveError = true;
         }
+      },
+      viewClass(index) {
+        this.$store.commit('setCurrentClassIndex', index);
+        this.$router.push({ path: 'view'})
       }
     }
   }
