@@ -12,16 +12,16 @@
 
         <v-layout row wrap>
           <v-flex xs12 sm6>
-            <v-card flat color="grey lighten-1">
+            <v-card flat color="grey lighten-5">
               <v-card-text>
                 <template v-for="(field, index) in currentClass.assignments">
                   <v-layout row wrap>
-                    <v-text-field label="Assignment" :placeholder="field.aName" readonly class="pr-3"></v-text-field>
-                    <v-text-field label="% of Final Grade" type="number" :placeholder="field.aPercent.toString()" readonly class="pr-3"></v-text-field>
-                    <v-text-field label="Assignment Score" type="number" v-model="assignmentScores[index]" @blur="calculateScore"></v-text-field>
+                    <v-text-field label="Assignment" v-model="field.aName" readonly class="pr-3"></v-text-field>
+                    <v-text-field label="% of Final Grade" type="number" v-model="field.aPercent.toString()" readonly class="pr-3"></v-text-field>
+                    <v-text-field label="Assignment Score" type="number" v-model="assignmentScores[index]" @input="calculateScore"></v-text-field>
                   </v-layout>
                 </template>
-                <v-card flat color="grey lighten-2">
+                <v-card flat color="grey lighten-5">
                   <v-card-text>
                     <v-list two-line subheader v-if="findRemainingGradeMode">
                       <v-subheader><h3>Grade needed on {{emptyFieldName}} for:</h3></v-subheader>
@@ -77,7 +77,20 @@
                         </v-container>
                       </v-list-tile>
                     </v-list>
-
+                    <v-list two-line subheader v-else-if="finalGradeMode">
+                      <v-subheader><h3>Your final grade is:</h3></v-subheader>
+                      <v-list-tile>
+                          <v-container fluid grid-list-sm>
+                            <v-layout row wrap>
+                                <v-flex xs4 v-for="i in 1" :key="i">
+                                  <v-layout row wrap>
+                                    <h2>{{finalGrade}}</h2>
+                                  </v-layout>
+                                </v-flex>
+                            </v-layout>
+                          </v-container>
+                      </v-list-tile>
+                    </v-list>
                   </v-card-text>
                 </v-card>
               </v-card-text>
@@ -89,26 +102,20 @@
                 <template v-for="(scale, index) in currentClass.gradeScales">
                   <v-layout row wrap>
                       <v-chip color="grey lighten-5"><h3>{{scale.letterPlus}}</h3></v-chip>
-                      <v-text-field type="number" readonly :placeholder="scale.highBoundPlus.toString()" class="pr-2"></v-text-field>
-                      <v-text-field type="number" readonly :placeholder="scale.lowBoundPlus.toString()"></v-text-field>
+                      <v-text-field type="number" readonly v-model="scale.highBoundPlus.toString()" class="pr-2"></v-text-field>
+                      <v-text-field type="number" readonly v-model="scale.lowBoundPlus.toString()"></v-text-field>
 
                       <v-chip color="grey lighten-5"><h3>{{scale.letter}}</h3></v-chip>
-                      <v-text-field type="number" readonly :placeholder="scale.highBound.toString()" class="pr-2"></v-text-field>
-                      <v-text-field type="number" readonly :placeholder="scale.lowBound.toString()"></v-text-field>
+                      <v-text-field type="number" readonly v-model="scale.highBound.toString()" class="pr-2"></v-text-field>
+                      <v-text-field type="number" readonly v-model="scale.lowBound.toString()"></v-text-field>
 
                       <v-chip color="grey lighten-5"><h3>{{scale.letterMin}}</h3></v-chip>
-                      <v-text-field type="number" readonly :placeholder="scale.highBoundMin.toString()" class="pr-2"></v-text-field>
-                      <v-text-field type="number" readonly :placeholder="scale.lowBoundMin.toString()"></v-text-field>
+                      <v-text-field type="number" readonly v-model="scale.highBoundMin.toString()" class="pr-2"></v-text-field>
+                      <v-text-field type="number" readonly v-model="scale.lowBoundMin.toString()"></v-text-field>
                   </v-layout>
                 </template>
               </v-card-text>
             </v-card>
-          </v-flex>
-        </v-layout>
-
-        <v-layout row wrap>
-          <v-flex xs12 sm6>
-            <h1>{{ total }}</h1>
           </v-flex>
         </v-layout>
 
@@ -129,9 +136,11 @@
         emptyFieldName: "",
         emptyFieldIndex: 0,
         findRemainingGradeMode: false,
+        finalGradeMode: false,
         gradeSigns: ["+","","-"],
         tempGrades: [],
         gradeSubtotal: 0,
+        finalGrade: 0,
       }
     },
     created() {
@@ -146,9 +155,12 @@
     },
     methods: {
       calculateScore () {
+        this.clearData();
         this.gradeSubtotal = 0;
+        this.finalGrade = 0;
         if (this.oneFieldBlank()) {
           this.findRemainingGradeMode = true;
+          this.finalGradeMode = false;
           for (var i in this.assignmentScores) {
             if (i !== this.emptyFieldIndex) {
               var score = parseInt(this.assignmentScores[i]);
@@ -184,10 +196,21 @@
               var trimmedString = numString.slice(0, -1);
               this.tempGrades[grade] = parseFloat(trimmedString);
             }
+            if (parseFloat(numString) < 0) {
+              this.tempGrades[grade] = 0;
+            }
           }
 
+        } else if (this.allFieldsFilled()) {
+          this.findRemainingGradeMode = false;
+          this.finalGradeMode = true;
+          for (var score in this.assignmentScores) {
+            this.finalGrade += (this.assignmentScores[score] / 100) * this.currentClass.assignments[score].aPercent;
+          }
+          this.finalGrade = this.finalGrade.toPrecision(4);
         } else {
           this.findRemainingGradeMode = false;
+          this.finalGradeMode = false;
         }
       },
       oneFieldBlank() {
@@ -205,6 +228,20 @@
         }
         return false;
       },
+      allFieldsFilled() {
+        for (var score in this.assignmentScores) {
+          if (isNaN(parseInt(this.assignmentScores[score]))) {
+            return false;
+          }
+        }
+        return true;
+      },
+      clearData() {
+        for (var grade in this.tempGrades) {
+          this.tempGrades[grade] = 0;
+        }
+        this.gradeSubtotal = 0;
+      },
     },
     computed: {
       currentClass() {
@@ -213,6 +250,10 @@
     },
   }
 </script>
+
+<style>
+
+</style>
 
 <!-->
 

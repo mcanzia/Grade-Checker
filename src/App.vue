@@ -3,15 +3,19 @@
     <router-view></router-view>
     <v-toolbar fixed app :clipped-left="clipped" color="light-green lighten-2">
       <v-toolbar-items>
-      <v-btn flat v-if="userIsAuthenticated && !addClassMode" @click='logout'>Logout</v-btn>
-      <v-btn flat v-for="item in toolbarItems" :key="item.title" :to="item.link">
-        {{item.title}}
-      </v-btn>
-    </v-toolbar-items>
-      <div v-if="addClassMode">
-        <v-btn flat @click='save'>Save</v-btn>
-      </div>
-      <v-toolbar-title v-text="title"></v-toolbar-title>
+        <v-btn flat v-if="userIsAuthenticated && !addClassMode" @click='logout'>Logout</v-btn>
+        <v-btn flat v-for="item in toolbarItems" :key="item.title" :to="item.link">
+          {{item.title}}
+        </v-btn>
+        <v-btn flat @click='save' v-if="addClassMode">Save</v-btn>
+        <v-btn flat @click='saveEdit' v-if="editClassMode">Save</v-btn>
+        <v-btn flat @click='editClass' v-if="viewClassMode">Edit</v-btn>
+      </v-toolbar-items>
+      <v-toolbar-title v-text="title" class="pr-3"></v-toolbar-title>
+      <v-chip v-if="saveError" label color="brown darken-3" text-color="white">
+        <v-icon left color="yellow accent-2">warning</v-icon>{{saveErrorMessage}}
+      </v-chip>
+
       <v-spacer></v-spacer>
       <v-btn v-if="userIsAuthenticated" icon @click.stop="rightDrawer = !rightDrawer">
         <v-icon>menu</v-icon>
@@ -50,6 +54,7 @@
         </v-list-tile>
       </v-list>
     </v-navigation-drawer>
+
     <v-footer :fixed="fixed" app>
       <span>&copy; 2017</span>
     </v-footer>
@@ -58,13 +63,17 @@
 
 <script>
   import AddClass from './components/addClass.vue';
+  import EditClass from './components/editClass.vue';
   export default {
     data () {
       return {
 
         isLogin: true,
         addClassMode: false,
+        viewClassMode: false,
+        editClassMode: false,
         saveError: false,
+        saveErrorMessage: "Name field empty or percentages do not add up to 100",
 
         fixed: true,
         clipped: false,
@@ -74,19 +83,36 @@
     },
     computed: {
       toolbarItems () {
+        this.saveError = false;
         let toolbarItems = [
           {title: 'Login', link: '/signin'},
           {title: 'Register', link: '/signup'},
         ]
         if (this.userIsAuthenticated) {
-          toolbarItems = [
-            {title: 'Add Class', link: '/add'},
-          ]
+          toolbarItems = [{title: 'Home', link: '/home'}];
           if (this.$route.name === 'Add') {
-            toolbarItems = []
             this.addClassMode = true;
+            this.viewClassMode = false;
+            this.editClassMode = false;
+          } else if (this.$route.name === 'View') {
+            this.viewClassMode = true;
+            this.addClassMode = false;
+            this.editClassMode = false;
+          } else if (this.$route.name === 'Edit') {
+            this.viewClassMode = false;
+            this.addClassMode = false;
+            this.editClassMode = true;
+          } else if (this.$route.name === 'Home') {
+            toolbarItems = [
+              {title: 'Add Class', link: '/add'},
+            ]
+            this.addClassMode = false;
+            this.viewClassMode = false;
+            this.editClassMode = false;
           } else {
             this.addClassMode = false;
+            this.viewClassMode = false;
+            this.editClassMode = false;
           }
         }
         this.rightDrawer = false;
@@ -103,13 +129,16 @@
     methods: {
 
       login() {
+        this.saveError = false;
         this.$router.push({ path: 'signin' });
         this.isLogin = true;
       },
       register() {
+        this.saveError = false;
         this.$router.push( { path: 'signup' } );
       },
       logout() {
+        this.saveError = false;
         this.$store.dispatch('logout')
         this.$router.push({ path: 'signin' })
       },
@@ -123,17 +152,29 @@
           this.saveError = true;
         }
       },
+      saveEdit() {
+        if (this.$store.getters.saveHundred === 0 && this.$store.getters.saveClassName !== "") {
+          this.saveError = false;
+          this.$store.dispatch('saveClassEdit');
+          this.$store.dispatch('resetSaveStatus');
+          this.$router.push({path: "view"});
+        } else {
+          this.saveError = true;
+        }
+      },
       viewClass(index) {
+        this.saveError = false;
         this.$store.commit('setCurrentClassIndex', index);
-        this.$router.push({ path: 'view'})
-      }
+        this.$router.push({ path: 'view'});
+      },
+      editClass() {
+        this.saveError = false;
+        this.$router.push({ path: 'edit'});
+      },
     }
   }
 </script>
 
 <!-->
-<v-tooltip v-model="saveError" right close-delay>
-  <span>Name field empty or percentages do not add up to 100</span>
-</v-tooltip>
-*/
+
 <-->
