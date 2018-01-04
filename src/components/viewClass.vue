@@ -257,7 +257,7 @@
     },
     computed: {
       currentClass() {
-        return this.$store.getters.loadedClasses[this.$store.getters.currentClassIndex];
+        return this.$store.getters.user.registeredClasses[this.$store.getters.currentClassIndex];
       },
 /*
       assignmentScores() {

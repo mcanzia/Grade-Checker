@@ -3,7 +3,7 @@
     <router-view></router-view>
     <v-toolbar fixed flat app :clipped-left="clipped" color="teal lighten-2">
       <v-toolbar-items>
-        <v-btn flat v-if="userIsAuthenticated && !addClassMode && !editClassMode" @click='logout'>Logout</v-btn>
+        <v-btn flat v-if="userIsAuthenticated && !addClassMode && !editClassMode && !viewClassMode" @click='logout'>Logout</v-btn>
         <v-btn flat v-for="item in toolbarItems" :key="item.title" :to="item.link">
           {{item.title}}
         </v-btn>
@@ -86,7 +86,7 @@
         viewClassMode: false,
         editClassMode: false,
         deleteClassMode: false,
-        removeButtonPressed: true,
+        removeButtonPressed: false,
         saveError: false,
         saveErrorMessage: "Name field empty or percentages do not add up to 100",
 
@@ -140,31 +140,31 @@
         return this.$store.getters.user !== null && this.$store.getters.user !== undefined
       },
       loadedClasses() {
-        return this.$store.getters.loadedClasses;
+        return this.$store.getters.user.registeredClasses;
       }
     },
     methods: {
 
       login() {
         this.saveError = false;
-        this.$router.push({ path: 'signin' });
+        this.$router.push('/signin/');
         this.isLogin = true;
       },
       register() {
         this.saveError = false;
-        this.$router.push( { path: 'signup' } );
+        this.$router.push('/signup/');
       },
       logout() {
         this.saveError = false;
         this.$store.dispatch('logout')
-        this.$router.push({ path: 'signin' })
+        this.$router.push('/signin/')
       },
       save() {
         if (this.$store.getters.saveHundred === 0 && this.$store.getters.saveClassName !== "") {
           this.saveError = false;
           this.$store.dispatch('addNewClass')
           this.$store.dispatch('resetSaveStatus');
-          this.$router.push({path: "home"});
+          this.$router.push('/home/');
         } else {
           this.saveError = true;
         }
@@ -174,7 +174,7 @@
           this.saveError = false;
           this.$store.dispatch('saveClassEdit');
           this.$store.dispatch('resetSaveStatus');
-          this.$router.push({path: "view"});
+          this.$router.push('/view/' + this.$store.getters.currentClassIndex);
         } else {
           this.saveError = true;
         }
