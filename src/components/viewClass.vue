@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <router-view></router-view>
+    <router-view :key="$route.fullPath"></router-view>
     <v-content>
       <v-container fluid grid-list-md>
 
@@ -138,22 +138,34 @@
         findRemainingGradeMode: false,
         finalGradeMode: false,
         gradeSigns: ["+","","-"],
-        tempGrades: [],
         gradeSubtotal: 0,
         finalGrade: 0,
+        tempGrades: [],
       }
     },
     created() {
-      for (var i in this.currentClass.assignments) {
-        this.assignmentScores.push("");
-      }
-      for (var i in this.currentClass.gradeScales) {
-        this.tempGrades.push(0);
-        this.tempGrades.push(0);
-        this.tempGrades.push(0);
+      this.resetArrays();
+    },
+    watch: {
+      '$route.params.id': function (id) {
+        this.resetArrays();
       }
     },
     methods: {
+      resetArrays() {
+        this.assignmentScores = [];
+        this.tempGrades = [];
+        for (var i in this.currentClass.assignments) {
+          this.assignmentScores.push("");
+        }
+        for (var i in this.currentClass.gradeScales) {
+          this.tempGrades.push(0);
+          this.tempGrades.push(0);
+          this.tempGrades.push(0);
+        }
+        this.findRemainingGradeMode = false;
+        this.finalGradeMode = false;
+      },
       calculateScore () {
         this.clearData();
         this.gradeSubtotal = 0;
@@ -246,7 +258,15 @@
     computed: {
       currentClass() {
         return this.$store.getters.loadedClasses[this.$store.getters.currentClassIndex];
+      },
+/*
+      assignmentScores() {
+        return this.$store.getters.assignmentScores;
+      },
+      tempGrades() {
+        return this.$store.getters.tempGrades;
       }
+*/
     },
   }
 </script>

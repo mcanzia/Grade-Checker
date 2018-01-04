@@ -46,10 +46,10 @@
 
           <v-layout row wrap>
             <v-flex xs1>
-              <v-btn raised color="blue" @click="addField()">New Field</v-btn>
+              <v-btn raised color="teal lighten-2" @click="addField()">New Field</v-btn>
             </v-flex>
             <v-flex xs1>
-              <v-btn raised color="blue" @click="edit()">{{modeName}}</v-btn>
+              <v-btn raised color="teal lighten-2" @click="edit()">{{modeName}}</v-btn>
             </v-flex>
           </v-layout>
 

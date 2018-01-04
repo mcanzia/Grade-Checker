@@ -26,6 +26,8 @@ export const store = new Vuex.Store({
     saveAssignments: [],
     saveGradeScale: [],
     currentClassIndex: -1,
+    assignmentScores: [],
+    tempGrades: [],
   },
   mutations: {
     setUser (state, payload) {
@@ -61,6 +63,25 @@ export const store = new Vuex.Store({
     setCurrentClassAssignment (state, payload) {
       state.loadedClasses[state.currentClassIndex].assignments = payload;
     },
+    removeClass(state, payload) {
+      state.loadedClasses.splice(payload, 1);
+    },
+    setAssignmentScores(state, payload) {
+      state.assignmentScores = payload
+    },
+    clearAssignmentScores(state) {
+      for (var i in state.assignmentScores) {
+        state.assignmentScores[i] = "";
+      }
+    },
+    setTempGrades(state, payload) {
+      state.tempGrades = payload
+    },
+    clearTempGrades(state) {
+      for (var i in state.tempGrades) {
+        state.tempGrades.pop;
+      }
+    }
   },
   actions: {
     signUserUp ({commit}, payload) {
@@ -156,13 +177,13 @@ export const store = new Vuex.Store({
     clearError ({commit}) {
       commit('clearError')
     },
-    loadClasses ({commit}) {
-      firebase.database().ref('classes').once('value')
+    loadClasses ({commit, getters}) {
+      const user = getters.user;
+      firebase.database().ref('/users/' + user.id).child('/classes/').once('value')
         .then((data) => {
           const classes = []
           const obj = data.val()
           for (let key in obj) {
-            //if (obj[key].userID === this.getters.user.id) {
               classes.push({
                 id: key,
                 name: obj[key].name,
@@ -170,7 +191,6 @@ export const store = new Vuex.Store({
                 gradeScales: obj[key].gradeScales,
                 userID: obj[key].userID,
               })
-            //}
           }
           commit('setLoadedClasses', classes)
         })
@@ -180,14 +200,20 @@ export const store = new Vuex.Store({
           }
         )
     },
+    sortClasses(classes) {
+      return classes.sort((classA, classB) => {
+        return classA.name > classB.name
+      })
+    },
     addNewClass ({commit, getters}) {
       var tempArray = getters.saveAssignments;
+      var newAssignmentArray = [];
       for (var field in tempArray) {
-        if (tempArray[field].aName === null || isNaN(parseInt(tempArray[field].aPercent)) || parseInt(tempArray[field].aPercent) <= 0) {
-          tempArray.splice(field, 1);
+        if (!(tempArray[field].aName === null || isNaN(parseInt(tempArray[field].aPercent)) || parseInt(tempArray[field].aPercent) <= 0)) {
+          newAssignmentArray.push(tempArray[field]);
         }
       }
-      commit('setSaveAssignments', tempArray);
+      commit('setSaveAssignments', newAssignmentArray);
 
       const newClass = {
         name: getters.saveClassName,
@@ -195,7 +221,8 @@ export const store = new Vuex.Store({
         gradeScales: getters.saveGradeScale,
         userID: getters.user.id
       }
-      firebase.database().ref('classes').push(newClass)
+      const user = getters.user;
+      firebase.database().ref('/users/' + user.id).child('/classes/').push(newClass)
         .then((data) => {
           const key = data.key
           commit('addNewClass', {
@@ -209,12 +236,13 @@ export const store = new Vuex.Store({
     },
     saveClassEdit({commit, getters}) {
       var tempArray = getters.loadedClasses[getters.currentClassIndex].assignments;
+      var newAssignmentArray = [];
       for (var field in tempArray) {
-        if (tempArray[field].aName === null || isNaN(parseInt(tempArray[field].aPercent)) || parseInt(tempArray[field].aPercent) <= 0) {
-          tempArray.splice(field, 1);
+        if (!(tempArray[field].aName === null || isNaN(parseInt(tempArray[field].aPercent)) || parseInt(tempArray[field].aPercent) <= 0)) {
+          newAssignmentArray.push(tempArray[field]);
         }
       }
-      commit('setCurrentClassAssignment', tempArray);
+      commit('setCurrentClassAssignment', newAssignmentArray);
 
       const editedClass = {
         name: getters.loadedClasses[getters.currentClassIndex].name,
@@ -222,10 +250,18 @@ export const store = new Vuex.Store({
         gradeScales: getters.loadedClasses[getters.currentClassIndex].gradeScales,
         userID: getters.user.id
       }
+      const user = getters.user;
       firebase.database().ref('classes/' + getters.loadedClasses[getters.currentClassIndex].id).set(editedClass)
         .catch((error) => {
           console.log(error)
         })
+    },
+    removeClass({commit, getters}, payload) {
+      firebase.database().ref('classes/' + getters.loadedClasses[payload].id).remove()
+        .catch((error) => {
+          console.log(error)
+        })
+      commit('removeClass', payload);
     },
     autoSignIn({commit}, payload) {
       commit('setUser', {id: payload.uid, registeredClasses: []})
@@ -237,9 +273,7 @@ export const store = new Vuex.Store({
   },
   getters: {
     loadedClasses (state) {
-      return state.loadedClasses.sort((classA, classB) => {
-        return classA.name > classB.name
-      })
+      return state.loadedClasses
     },
     user (state) {
       return state.user
@@ -261,7 +295,14 @@ export const store = new Vuex.Store({
     },
     currentClassIndex (state) {
       return state.currentClassIndex
-    }
+    },
+    assignmentScores (state) {
+      return state.assignmentScores
+    },
+    tempGrades (state) {
+      return state.tempGrades
+    },
+
     /*
     loadedClass (state) {
       return (classId) => {

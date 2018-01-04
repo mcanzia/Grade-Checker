@@ -30,8 +30,8 @@
             <v-layout row wrap>
               <div v-if="editMode">
                 <v-flex xs1>
-                  <v-btn @click="removeField(index)" class="remove-button" fab top dark small color="red" style="width: 25px; height: 25px;">
-                    <v-icon light>remove</v-icon>
+                  <v-btn icon @click="removeField(index)" top small style="width: 25px; height: 25px;">
+                    <v-icon color="red">remove_circle_outline</v-icon>
                   </v-btn>
                 </v-flex>
               </div>
@@ -46,10 +46,10 @@
 
           <v-layout row wrap>
             <v-flex xs1>
-              <v-btn raised color="blue" @click="addField()" name="add-new-field">New Field</v-btn>
+              <v-btn raised color="teal lighten-2" @click="addField()" name="add-new-field">New Field</v-btn>
             </v-flex>
             <v-flex xs1>
-              <v-btn raised color="blue" @click="edit()" name="edit-mode">{{modeName}}</v-btn>
+              <v-btn raised color="teal lighten-2" @click="edit()" name="edit-mode">{{modeName}}</v-btn>
             </v-flex>
           </v-layout>
 
