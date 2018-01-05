@@ -93,7 +93,6 @@
     data () {
       return {
 
-        isLogin: true,
         addClassMode: false,
         viewClassMode: false,
         editClassMode: false,
@@ -104,7 +103,6 @@
 
         fixed: true,
         clipped: false,
-        miniVariant: true,
         rightDrawer: false,
         menuOpen: false,
         title: 'Grade Checker',
@@ -158,15 +156,6 @@
     },
     methods: {
 
-      login() {
-        this.saveError = false;
-        this.$router.push('/signin');
-        this.isLogin = true;
-      },
-      register() {
-        this.saveError = false;
-        this.$router.push('/signup');
-      },
       logout() {
         this.saveError = false;
         this.$store.dispatch('logout')
@@ -235,7 +224,3 @@
     }
   }
 </script>
-
-<!-->
-
-<-->

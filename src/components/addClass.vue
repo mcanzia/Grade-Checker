@@ -107,16 +107,8 @@
   export default {
     data () {
       return {
-        clipped: false,
-        drawer: true,
-        fixed: false,
 
-        assignments: [
-          {
-            aName: "",
-            aPercent: 0,
-          }
-        ],
+        assignments: [],
 
         gradeScales: [
           {
@@ -176,21 +168,16 @@
         editMode: false,
         modeName: "Edit",
         newClass: "Add Class",
-
-        miniVariant: false,
-        right: true,
-        rightDrawer: false,
-        title: 'Grade Checker'
       }
     },
     methods: {
-      addField: function() {
+      addField() {
          this.numFields++;
          this.assignments.push(new Object());
          this.$store.commit('setSaveAssignments', this.assignments);
          this.$store.commit('setSaveGradeScale', this.gradeScales);
       },
-      edit: function() {
+      edit() {
         if (this.modeName === "Edit") {
           this.editMode = true;
           this.modeName = "Cancel";
@@ -235,19 +222,3 @@
     }
   }
 </script>
-
-<style>
-  .remove-button {
-    width: 50%;
-  }
-</style>
-
-<!--
-<v-flex xs4>
-  <v-select name="test-field" v-bind:items="numTests" label="Number of Tests" v-model="howManyTests"></v-select>
-</v-flex>
-<v-flex xs4>
-    <v-text-field name="test-percent-field" label="Test % (of final)" v-show="howManyTests > 0"></v-text-field>
-</v-flex>
-
--->

@@ -39,24 +39,11 @@
   export default {
     data () {
       return {
-        clipped: false,
-        drawer: true,
-        fixed: false,
-
         modeName: "Edit",
         loginStatus: 'Login',
-
-        miniVariant: false,
-        right: true,
-        rightDrawer: false,
-        title: 'Grade Checker',
       }
     },
-    computed: {
-
-    },
     methods: {
-
       addClass() {
         this.$router.push({ path: 'add' });
       },

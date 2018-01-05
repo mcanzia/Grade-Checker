@@ -106,9 +106,6 @@
   export default {
     data () {
       return {
-        clipped: false,
-        drawer: true,
-        fixed: false,
 
         fGrade: "",
         saveError: false,
@@ -120,10 +117,6 @@
         editMode: false,
         modeName: "Edit",
 
-
-        right: true,
-        rightDrawer: false,
-        title: 'Grade Checker'
       }
     },
     created() {

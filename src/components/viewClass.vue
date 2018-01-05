@@ -342,14 +342,6 @@
       currentClass() {
         return this.$store.getters.user.registeredClasses[this.$store.getters.currentClassIndex];
       },
-/*
-      assignmentScores() {
-        return this.$store.getters.assignmentScores;
-      },
-      tempGrades() {
-        return this.$store.getters.tempGrades;
-      }
-*/
     },
   }
 </script>
@@ -357,38 +349,3 @@
 <style>
 
 </style>
-
-<!-->
-<v-layout row wrap class="hidden-sm-and-up">
-  <v-flex xs2>
-    <v-chip color="grey lighten-5"><h3>{{scale.letterPlus}}</h3></v-chip>
-  </v-flex>
-  <v-flex xs2>
-    <v-text-field type="number" readonly v-model="scale.highBoundPlus.toString()" class="pr-2"></v-text-field>
-  </v-flex>
-  <v-flex xs2>
-    <v-text-field type="number" readonly v-model="scale.lowBoundPlus.toString()"></v-text-field>
-  </v-flex>
-
-  <v-flex xs2>
-    <v-chip color="grey lighten-5"><h3>{{scale.letter}}</h3></v-chip>
-  </v-flex>
-  <v-flex xs2>
-    <v-text-field type="number" readonly v-model="scale.highBound.toString()" class="pr-2"></v-text-field>
-  </v-flex>
-  <v-flex xs2>
-    <v-text-field type="number" readonly v-model="scale.lowBound.toString()"></v-text-field>
-  </v-flex>
-
-  <v-flex xs2>
-    <v-chip color="grey lighten-5"><h3>{{scale.letterMin}}</h3></v-chip>
-  </v-flex>
-  <v-flex xs2>
-    <v-text-field type="number" readonly v-model="scale.highBoundMin.toString()" class="pr-2"></v-text-field>
-  </v-flex>
-  <v-flex xs2>
-    <v-text-field type="number" readonly v-model="scale.lowBoundMin.toString()"></v-text-field>
-  </v-flex>
-</v-layout>
-
-<-->
