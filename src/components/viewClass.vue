@@ -16,12 +16,17 @@
               <v-card-text>
                 <template v-for="(field, index) in currentClass.assignments">
                   <v-layout row wrap>
-                    <v-text-field label="Assignment" v-model="field.aName" readonly class="pr-3"></v-text-field>
-                    <v-text-field label="% of Final Grade" type="number" v-model="field.aPercent.toString()" readonly class="pr-3"></v-text-field>
+                    <v-flex xs4 sm4>
+                      <v-text-field label="Assignment" v-model="field.aName" readonly class="pr-3"></v-text-field>
+                    </v-flex>
+                    <v-flex xs2 sm4>
+                      <v-text-field label="% of Final Grade" type="number" v-model="field.aPercent.toString()" readonly class="pr-3 hidden-xs-only"></v-text-field>
+                      <v-text-field label="%" type="number" v-model="field.aPercent.toString()" readonly class="pr-3 hidden-sm-and-up"></v-text-field>
+                    </v-flex>
                     <v-text-field label="Assignment Score" type="number" v-model="assignmentScores[index]" @input="calculateScore"></v-text-field>
                   </v-layout>
                 </template>
-                <v-card flat color="grey lighten-5">
+                <v-card flat color="grey lighten-5" class="hidden-xs-only">
                   <v-card-text>
                     <v-list two-line subheader v-if="findRemainingGradeMode">
                       <v-subheader><h3>Grade needed on {{emptyFieldName}} for:</h3></v-subheader>
@@ -95,12 +100,90 @@
                 </v-card>
               </v-card-text>
             </v-card>
+
+            <v-card flat color="grey lighten-5" class="hidden-sm-and-up">
+              <v-card-text>
+                <v-list two-line subheader v-if="findRemainingGradeMode">
+                  <v-subheader><h3>Grade needed on {{emptyFieldName}} for:</h3></v-subheader>
+                  <v-list-tile>
+                      <v-container fluid grid-list-sm>
+                        <v-layout row wrap>
+                            <v-flex xs4 v-for="i in 3" :key="i">
+                              <v-layout row wrap>
+                                <h3>A{{gradeSigns[i-1]}} ─</h3>
+                                <h3>&nbsp{{tempGrades[0 + (i-1)]}}</h3>
+                              </v-layout>
+                            </v-flex>
+                        </v-layout>
+                      </v-container>
+                  </v-list-tile>
+                  <v-divider></v-divider>
+                  <v-list-tile>
+                      <v-container fluid grid-list-sm>
+                        <v-layout row wrap>
+                            <v-flex xs4 v-for="i in 3" :key="i">
+                              <v-layout row wrap>
+                                <h3>B{{gradeSigns[i-1]}} ─</h3>
+                                <h3>&nbsp{{tempGrades[3 + (i-1)]}}</h3>
+                              </v-layout>
+                            </v-flex>
+                        </v-layout>
+                      </v-container>
+                  </v-list-tile>
+                  <v-divider></v-divider>
+                  <v-list-tile>
+                    <v-container fluid grid-list-sm>
+                      <v-layout row wrap>
+                          <v-flex xs4 v-for="i in 3" :key="i">
+                            <v-layout row wrap>
+                              <h3>C{{gradeSigns[i-1]}} ─</h3>
+                              <h3>&nbsp{{tempGrades[6 + (i-1)]}}</h3>
+                            </v-layout>
+                          </v-flex>
+                      </v-layout>
+                    </v-container>
+                  </v-list-tile>
+                  <v-divider></v-divider>
+                  <v-list-tile>
+                    <v-container fluid grid-list-sm>
+                      <v-layout row wrap>
+                          <v-flex xs4 v-for="i in 3" :key="i">
+                            <v-layout row wrap>
+                              <h3>D{{gradeSigns[i-1]}} ─</h3>
+                              <h3>&nbsp{{tempGrades[9 + (i-1)]}}</h3>
+                            </v-layout>
+                          </v-flex>
+                      </v-layout>
+                    </v-container>
+                  </v-list-tile>
+                </v-list>
+                <v-list two-line subheader v-else-if="finalGradeMode">
+                  <v-subheader><h3>Your final grade is:</h3></v-subheader>
+                  <v-list-tile>
+                      <v-container fluid grid-list-sm>
+                        <v-layout row wrap>
+                            <v-flex xs4 v-for="i in 1" :key="i">
+                              <v-layout row wrap>
+                                <h3>{{finalGrade}}</h3>
+                              </v-layout>
+                            </v-flex>
+                        </v-layout>
+                      </v-container>
+                  </v-list-tile>
+                </v-list>
+              </v-card-text>
+            </v-card>
+            </v-card-text>
+            </v-card>
+
           </v-flex>
+
           <v-flex xs12 sm6>
             <v-card flat color="grey lighten-5">
               <v-card-text>
                 <template v-for="(scale, index) in currentClass.gradeScales">
-                  <v-layout row wrap>
+
+                  <v-layout row wrap class="hidden-xs-only">
                       <v-chip color="grey lighten-5"><h3>{{scale.letterPlus}}</h3></v-chip>
                       <v-text-field type="number" readonly v-model="scale.highBoundPlus.toString()" class="pr-2"></v-text-field>
                       <v-text-field type="number" readonly v-model="scale.lowBoundPlus.toString()"></v-text-field>
@@ -276,6 +359,36 @@
 </style>
 
 <!-->
+<v-layout row wrap class="hidden-sm-and-up">
+  <v-flex xs2>
+    <v-chip color="grey lighten-5"><h3>{{scale.letterPlus}}</h3></v-chip>
+  </v-flex>
+  <v-flex xs2>
+    <v-text-field type="number" readonly v-model="scale.highBoundPlus.toString()" class="pr-2"></v-text-field>
+  </v-flex>
+  <v-flex xs2>
+    <v-text-field type="number" readonly v-model="scale.lowBoundPlus.toString()"></v-text-field>
+  </v-flex>
 
+  <v-flex xs2>
+    <v-chip color="grey lighten-5"><h3>{{scale.letter}}</h3></v-chip>
+  </v-flex>
+  <v-flex xs2>
+    <v-text-field type="number" readonly v-model="scale.highBound.toString()" class="pr-2"></v-text-field>
+  </v-flex>
+  <v-flex xs2>
+    <v-text-field type="number" readonly v-model="scale.lowBound.toString()"></v-text-field>
+  </v-flex>
+
+  <v-flex xs2>
+    <v-chip color="grey lighten-5"><h3>{{scale.letterMin}}</h3></v-chip>
+  </v-flex>
+  <v-flex xs2>
+    <v-text-field type="number" readonly v-model="scale.highBoundMin.toString()" class="pr-2"></v-text-field>
+  </v-flex>
+  <v-flex xs2>
+    <v-text-field type="number" readonly v-model="scale.lowBoundMin.toString()"></v-text-field>
+  </v-flex>
+</v-layout>
 
 <-->

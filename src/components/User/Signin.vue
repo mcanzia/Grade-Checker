@@ -9,7 +9,7 @@
     </v-layout>
     <v-layout>
       <v-flex xs12 sm6 offset-sm3>
-        <v-card>
+        <v-card v-if="!loading">
           <v-card-text>
             <v-container>
               <form @submit.prevent="onSignin">
@@ -24,14 +24,24 @@
                   </v-flex>
                 </v-layout>
                 <v-layout row>
-                  <v-flex xs12>
+                  <v-flex sm3 class="hidden-xs-only">
                     <v-btn type="submit">Sign in</v-btn>
+                  </v-flex>
+                  <v-flex xs12 class="hidden-sm-and-up">
+                    <v-btn type="submit">Sign in</v-btn>
+                  </v-flex>
+                  <v-flex sm1 class="hidden-xs-only">
+                    <v-btn @click="onGoogleSignIn" class="blue white--text">Sign in with Google</v-btn>
+                  </v-flex>
+                  <v-flex xs12 class="hidden-sm-and-up">
+                    <v-btn @click="onGoogleSignIn" class="blue white--text">Sign in with Google</v-btn>
                   </v-flex>
                 </v-layout>
               </form>
             </v-container>
           </v-card-text>
         </v-card>
+        <v-progress-circular v-else indeterminate v-bind:size="50" color="teal lighten-2">></v-progress-circular>
       </v-flex>
     </v-layout>
   </v-container>
@@ -63,11 +73,14 @@ export default {
     error () {
       return this.$store.getters.error
     },
+    loading () {
+        return this.$store.getters.loading
+    },
   },
   watch: {
     user (value) {
       if (value !== null && value !== undefined) {
-        this.$router.push('home')
+        this.$router.push('/home')
       }
     }
   },
@@ -79,11 +92,14 @@ export default {
       this.$store.dispatch('clearError')
     },
     login() {
-      this.$router.push({ path: 'signin' });
+      this.$router.push('/signin/' );
       this.isLogin = true;
     },
     register() {
-      this.$router.push({path: 'signup'});
+      this.$router.push('/signup/');
+    },
+    onGoogleSignIn() {
+      this.$store.dispatch('googleSignIn')
     },
   }
 }

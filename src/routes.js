@@ -6,6 +6,7 @@ import App from "./App.vue";
 import AuthGuard from './auth-guard.js';
 import viewClass from './components/viewClass.vue';
 import editClass from './components/editClass.vue';
+import classList from './components/classList.vue';
 
 export default [
   { path: '/add', name: 'Add', component: addClass, beforeEnter: AuthGuard},
@@ -14,4 +15,5 @@ export default [
   { path: '/edit', name: 'Edit', component: editClass, beforeEnter: AuthGuard },
   { path: '/signup', name: 'Signup', component: Signup },
   { path: '/signin', name: 'Signin', component: Signin },
+  { path: '/classlist', name: 'ClassList', component: classList},
 ]

@@ -33,7 +33,7 @@ new Vue({
       projectId: 'grade-checker-mjcanzia',
       storageBucket: 'grade-checker-mjcanzia.appspot.com',
     });
-    this.$router.push({ path: 'signin' })
+    this.$router.push('/signin')
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         this.$store.dispatch('autoSignIn', user)

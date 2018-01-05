@@ -37,6 +37,9 @@ export const store = new Vuex.Store({
     setSaveGradeScale (state, payload) {
       state.saveGradeScale = payload
     },
+    setLoading (state, payload) {
+      state.loading = payload
+    },
     setError (state, payload) {
       state.error = payload
     },
@@ -77,10 +80,12 @@ export const store = new Vuex.Store({
   },
   actions: {
     signUserUp ({commit}, payload) {
+      commit('setLoading', true)
       commit('clearError')
       firebase.auth().createUserWithEmailAndPassword(payload.email, payload.password)
         .then(
           user => {
+            commit('setLoading', false)
             const newUser = {
               id: user.uid,
               registeredClasses: []
@@ -90,12 +95,14 @@ export const store = new Vuex.Store({
         )
         .catch(
           error => {
+            commit('setLoading', false)
             commit('setError', error)
             console.log(error)
           }
         )
     },
     signUserIn ( {commit}, payload) {
+      commit('setLoading', true)
       commit('clearError')
       firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
       .then(
@@ -105,62 +112,37 @@ export const store = new Vuex.Store({
             registeredClasses: []
           }
           commit('setUser', newUser)
+          commit('setLoading', false)
         }
+
       )
       .catch(
         error => {
+          commit('setLoading', false)
           commit('setError', error)
         }
       )
     },
-    googleSignIn ( {commit}, payload ) {
-      console.log('Google Auth Response', payload);
-      // We need to register an Observer on Firebase Auth to make sure auth is initialized.
-      var unsubscribe = firebase.auth().onAuthStateChanged(function(firebaseUser) {
-        unsubscribe();
-        // Check if we are already signed-in Firebase with the correct user.
-        if (!isUserEqual(payload, firebaseUser)) {
-          // Build Firebase credential with the Google ID token.
-          var credential = firebase.auth.GoogleAuthProvider.credential(
-            googleUser.getAuthResponse().id_token);
-            // Sign in with credential from the Google user.
-            firebase.auth().signInWithCredential(credential).catch(function(error) {
-              // Handle Errors here.
-              var errorCode = error.code;
-              var errorMessage = error.message;
-              // The email of the user's account used.
-              var email = error.email;
-              // The firebase.auth.AuthCredential type that was used.
-              var credential = error.credential;
-              // ...
-            });
-            const newUser = {
-              id: firebaseUser.uid,
-              registeredClasses: []
-            }
-            commit('setUser', newUser)
-          } else {
-            console.log('User already signed-in Firebase.');
-            const oldUser = {
-              id: firebaseUser.uid,
-              registeredClasses: []
-            }
-            commit('setUser', oldUser)
-          }
-        });
-    },
-    isUserEqual(googleUser, firebaseUser) {
-      if (firebaseUser) {
-        var providerData = firebaseUser.providerData;
-        for (var i = 0; i < providerData.length; i++) {
-          if (providerData[i].providerId === firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
-              providerData[i].uid === googleUser.getBasicProfile().getId()) {
-            // We don't need to reauth the Firebase connection.
-            return true;
-          }
+    googleSignIn ( {commit} ) {
+      commit('setLoading', true)
+      commit('clearError')
+      var provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithRedirect(provider);
+
+      firebase.auth().getRedirectResult().then(function(result) {
+        if (result.credential) {
+          var token = result.credential.accessToken;
         }
-      }
-      return false;
+        var user = result.user;
+        const newUser = {
+          id: user.uid,
+          registeredClasses: []
+        }
+        commit('setUser', newUser)
+      }).catch(function(error) {
+        commit('setLoading', false)
+        console.log(error)
+      });
     },
     resetSaveStatus ({commit}) {
       commit('setSaveHundred', 100)
@@ -189,6 +171,7 @@ export const store = new Vuex.Store({
               })
           }
           commit('setUserClasses', classes)
+          
         })
         .catch(
           (error) => {
@@ -225,6 +208,7 @@ export const store = new Vuex.Store({
             ...newClass,
             id: key
           })
+
         })
         .catch((error) => {
           console.log(error)
@@ -241,18 +225,20 @@ export const store = new Vuex.Store({
       commit('setCurrentClassAssignment', newAssignmentArray);
 
       const user = getters.user
+
       const editedClass = {
         name: user.registeredClasses[getters.currentClassIndex].name,
         assignments: user.registeredClasses[getters.currentClassIndex].assignments,
         gradeScales: user.registeredClasses[getters.currentClassIndex].gradeScales,
-        userID: getters.user.id
+        userID: getters.user.id,
       }
+      console.log(user.id)
+      console.log(user.registeredClasses[getters.currentClassIndex].id)
 
       firebase.database().ref('/users/' + user.id + '/classes/' + user.registeredClasses[getters.currentClassIndex].id).set(editedClass)
         .catch((error) => {
           console.log(error)
         })
-
     },
     removeClass({commit, getters}, payload) {
       const user = getters.user
@@ -261,39 +247,53 @@ export const store = new Vuex.Store({
           console.log(error)
         })
       commit('removeClass', payload);
+
     },
     autoSignIn({commit}, payload) {
       commit('setUser', {id: payload.uid, registeredClasses: []})
     },
     fetchUserData ({commit, getters}) {
+      commit('setLoading', true)
       firebase.database().ref('/users/' + getters.user.id + '/classes/').once('value')
         .then(data => {
           const classVals = data.val()
           let registeredClasses = []
           for (let key in classVals) {
-            registeredClasses.push(classVals[key])
+            registeredClasses.push({...classVals[key], id: key})
           }
           const updatedUser = {
             id: getters.user.id,
-            registeredClasses: registeredClasses,
+            registeredClasses: registeredClasses
           }
+
           commit('setUser', updatedUser)
         })
         .catch(error => {
+          commit('setLoading', false)
           console.log(error)
         })
     },
     logout({commit}) {
       firebase.auth().signOut()
+        .then( () => {
+          console.log("Logged Out Successfully")
+        })
+      commit('setLoading', false)
       commit('setUser', null)
     },
   },
   getters: {
     loadedClasses (state) {
+      if (state.user === null) {
+        return
+      }
       return state.user.registeredClasses
     },
     user (state) {
       return state.user
+    },
+    loading (state) {
+      return state.loading
     },
     error (state) {
       return state.error
@@ -319,15 +319,5 @@ export const store = new Vuex.Store({
     tempGrades (state) {
       return state.tempGrades
     },
-
-    /*
-    loadedClass (state) {
-      return (classId) => {
-        return state.loadedClass.find((class) => {
-          return class.id === classId
-        })
-      }
-    }
-    */
   },
 })

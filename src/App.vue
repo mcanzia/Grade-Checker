@@ -2,7 +2,7 @@
   <v-app>
     <router-view></router-view>
     <v-toolbar fixed flat app :clipped-left="clipped" color="teal lighten-2">
-      <v-toolbar-items>
+      <v-toolbar-items class="hidden-xs-only">
         <v-btn flat v-if="userIsAuthenticated && !addClassMode && !editClassMode && !viewClassMode" @click='logout'>Logout</v-btn>
         <v-btn flat v-for="item in toolbarItems" :key="item.title" :to="item.link">
           {{item.title}}
@@ -11,15 +11,35 @@
         <v-btn flat @click='saveEdit' v-if="editClassMode">Save</v-btn>
         <v-btn flat @click='editClass' v-if="viewClassMode">Edit</v-btn>
       </v-toolbar-items>
-      <v-toolbar-title v-text="title" class="pr-3"></v-toolbar-title>
-      <v-chip v-if="saveError" color="red accent-4" text-color="white">
+      <v-toolbar-items class="hidden-sm-and-up">
+        <v-btn flat v-if="userIsAuthenticated && !addClassMode && !editClassMode && !viewClassMode" @click='logout'>Logout</v-btn>
+        <v-btn flat v-for="item in toolbarItems" :key="item.title" :to="item.link">
+          {{item.title}}
+        </v-btn>
+        <v-btn flat @click='save' v-if="addClassMode">Save</v-btn>
+        <v-btn flat @click='saveEdit' v-if="editClassMode">Save</v-btn>
+        <v-btn flat @click='editClass' v-if="viewClassMode">Edit</v-btn>
+        <v-btn flat @click='goToClasses' v-if="userIsAuthenticated && !addClassMode && !editClassMode && !viewClassMode" class="hidden-sm-and-up">Classes</v-btn>
+      </v-toolbar-items>
+
+      <v-toolbar-title v-text="title" class="pr-3 hidden-xs-only"></v-toolbar-title>
+      <v-toolbar-title v-if="!userIsAuthenticated" v-text="title" class="pr-3 hidden-sm-and-up"></v-toolbar-title>
+
+      <v-chip v-if="saveError" color="red accent-4" text-color="white" class="hidden-xs-only">
         <v-icon left color="yellow accent-2">warning</v-icon>{{saveErrorMessage}}
       </v-chip>
 
-      <v-spacer></v-spacer>
-      <v-btn v-if="userIsAuthenticated && !editClassMode" icon @click.stop="rightDrawer = !rightDrawer">
+      <v-chip v-if="saveError" color="red accent-4" text-color="white" class="hidden-sm-and-up">
+        <v-icon left color="yellow accent-2">warning</v-icon>Name empty or % field ≠ 100
+      </v-chip>
+
+      <v-spacer class="hidden-xs-only"></v-spacer>
+
+      <v-btn v-if="userIsAuthenticated && !editClassMode" icon @click.stop="toggleDrawer" class="hidden-xs-only">
         <v-icon>menu</v-icon>
       </v-btn>
+
+
     </v-toolbar>
     <v-content>
       <v-container fluid grid-list-md>
@@ -30,10 +50,9 @@
     </v-content>
     <v-navigation-drawer
       fixed
-      :clipped="clipped"
       v-model="rightDrawer"
       width=216
-      class="grey lighten-4"
+      class="grey lighten-4 hidden-xs-only"
       right
       app
       disable-route-watcher
@@ -43,13 +62,7 @@
       <v-list>
         <v-subheader class="mt-2"><h2 style="color: black">Classes</h2></v-subheader>
         <v-divider></v-divider>
-        <v-list-tile
-          value="true"
-          v-for="(item, i) in loadedClasses"
-          :key="i"
-          @click="viewClass(i)"
-          ripple
-        >
+        <v-list-tile value="true" v-for="(item, i) in loadedClasses" :key="i" @click="viewClass(i)" ripple>
 
           <v-list-tile-content>
             <v-list-tile-title class="teal--text text--lighten-2">
@@ -76,7 +89,6 @@
 <script>
   import AddClass from './components/addClass.vue';
   import EditClass from './components/editClass.vue';
-  import colors from 'vuetify/es5/util/colors';
   export default {
     data () {
       return {
@@ -94,6 +106,7 @@
         clipped: false,
         miniVariant: true,
         rightDrawer: false,
+        menuOpen: false,
         title: 'Grade Checker',
       }
     },
@@ -147,24 +160,32 @@
 
       login() {
         this.saveError = false;
-        this.$router.push('/signin/');
+        this.$router.push('/signin');
         this.isLogin = true;
       },
       register() {
         this.saveError = false;
-        this.$router.push('/signup/');
+        this.$router.push('/signup');
       },
       logout() {
         this.saveError = false;
         this.$store.dispatch('logout')
-        this.$router.push('/signin/')
+        this.$router.push('/signin')
+      },
+      toggleDrawer() {
+        if (this.rightDrawer) {
+            this.rightDrawer = false;
+            this.deleteClassMode = false;
+        } else {
+          this.rightDrawer = true;
+        }
       },
       save() {
         if (this.$store.getters.saveHundred === 0 && this.$store.getters.saveClassName !== "") {
           this.saveError = false;
           this.$store.dispatch('addNewClass')
           this.$store.dispatch('resetSaveStatus');
-          this.$router.push('/home/');
+          this.$router.push('/home');
         } else {
           this.saveError = true;
         }
@@ -186,7 +207,7 @@
 
         if (this.removeButtonPressed) {
           if (this.loadedClasses.length === 0) {
-              this.$router.push('/home/');
+              this.$router.push('/home');
           } else {
             this.$store.commit('setCurrentClassIndex', 0);
             this.$router.push('/view/' + index);
@@ -199,7 +220,7 @@
       },
       editClass() {
         this.saveError = false;
-        this.$router.push('/edit/');
+        this.$router.push('/edit');
       },
       removeClass(index) {
         this.saveError = false;
@@ -207,6 +228,10 @@
         this.$store.dispatch('removeClass', index);
         this.$store.commit('setCurrentClassIndex', index);
       },
+      goToClasses() {
+        this.saveError = false;
+        this.$router.push('/classlist');
+      }
     }
   }
 </script>

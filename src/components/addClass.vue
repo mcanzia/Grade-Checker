@@ -2,13 +2,13 @@
   <v-app>
     <router-view></router-view>
     <v-content>
-      <v-container fluid grid-list-md>
+      <v-container fluid grid-list-md >
 
           <v-layout row wrap>
-            <v-flex xs2>
+            <v-flex xs5 sm2>
               <v-text-field name="name-field" label="Name" v-model="className" @blur="setName" required></v-text-field>
             </v-flex>
-            <v-flex xs4>
+            <v-flex xs5 sm4>
               <div v-if="progress < 100">
                 <v-progress-linear v-model="progress"></v-progress-linear>
               </div>
@@ -35,20 +35,29 @@
                   </v-btn>
                 </v-flex>
               </div>
-              <v-flex xs2>
+              <v-flex xs5 sm2>
                 <v-text-field label="Assignment" v-model="assignments[index].aName"></v-text-field>
               </v-flex>
-              <v-flex xs2>
+              <v-flex xs5 sm2>
                 <v-text-field label="% of Final Grade" v-model="assignments[index].aPercent" type="number" @focus="storeTempValue(index)" @blur="updateHundred(index)"></v-text-field>
               </v-flex>
             </v-layout>
           </template>
 
-          <v-layout row wrap>
-            <v-flex xs1>
+          <v-layout row wrap class="hidden-xs-only">
+            <v-flex sm1>
               <v-btn raised color="teal lighten-2" @click="addField()" name="add-new-field">New Field</v-btn>
             </v-flex>
-            <v-flex xs1>
+            <v-flex sm1 class="ml-5">
+              <v-btn raised color="teal lighten-2" @click="edit()" name="edit-mode">{{modeName}}</v-btn>
+            </v-flex>
+          </v-layout>
+
+          <v-layout row wrap class="hidden-sm-and-up">
+            <v-flex xs3>
+              <v-btn raised color="teal lighten-2" @click="addField()" name="add-new-field">New Field</v-btn>
+            </v-flex>
+            <v-flex xs3 class="ml-4">
               <v-btn raised color="teal lighten-2" @click="edit()" name="edit-mode">{{modeName}}</v-btn>
             </v-flex>
           </v-layout>
@@ -56,39 +65,40 @@
           <template v-for="(grade, index) in gradeScales">
             <v-layout row wrap>
 
-              <v-flex xs1>
+              <v-flex xs2 sm1>
                 <v-text-field type="number" v-model="gradeScales[index].highBoundPlus"></v-text-field>
               </v-flex>
-              <v-flex xs1>
+              <v-flex xs2 sm1>
                 <v-text-field type="number" v-model="gradeScales[index].lowBoundPlus"></v-text-field>
               </v-flex>
-              <v-flex xs1>
+              <v-flex xs2 sm1>
                 <v-chip>{{gradeScales[index].letterPlus}}</v-chip>
               </v-flex>
 
-              <v-flex xs1>
+              <v-flex xs2 sm1>
                 <v-text-field type="number" v-model="gradeScales[index].highBound"></v-text-field>
               </v-flex>
-              <v-flex xs1>
+              <v-flex xs2 sm1>
                 <v-text-field type="number" v-model="gradeScales[index].lowBound"></v-text-field>
               </v-flex>
-              <v-flex xs1>
+              <v-flex xs2 sm1>
                 <v-chip>{{gradeScales[index].letter}}</v-chip>
               </v-flex>
 
-              <v-flex xs1>
+              <v-flex xs2 sm1>
                 <v-text-field type="number" v-model="gradeScales[index].highBoundMin"></v-text-field>
               </v-flex>
-              <v-flex xs1>
+              <v-flex xs2 sm1>
                 <v-text-field type="number" v-model="gradeScales[index].lowBoundMin"></v-text-field>
               </v-flex>
-              <v-flex xs1>
+              <v-flex xs2 sm1>
                 <v-chip>{{gradeScales[index].letterMin}}</v-chip>
               </v-flex>
             </v-layout>
           </template>
 
       </v-container>
+
     </v-content>
   </v-app>
 </template>

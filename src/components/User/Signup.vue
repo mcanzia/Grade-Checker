@@ -32,9 +32,6 @@
                   <v-flex xs12>
                     <v-btn type="submit">Sign up</v-btn>
                   </v-flex>
-                  <v-flex xs12>
-                    <div class="g-signin2" data-onsuccess="onGoogleSignup" data-theme="dark"></div>
-                  </v-flex>
                 </v-layout>
               </form>
             </v-container>
@@ -79,7 +76,7 @@ export default {
   watch: {
     user (value) {
       if (value !== null && value !== undefined) {
-        this.$router.push('home')
+        this.$router.push('/home/')
       }
     }
   },
@@ -87,19 +84,18 @@ export default {
     onSignup() {
       this.$store.dispatch('signUserUp', {email: this.email, password: this.password})
     },
-    onGoogleSignup(googleUser) {
-      this.$store.dispatch('googleSignUp', googleUser)
-    },
     onDismissed() {
       this.$store.dispatch('clearError')
     },
     login() {
-      this.$router.push({ path: 'signin' });
+      this.$router.push('/signin/');
       this.isLogin = true;
     },
     register() {
-      this.$router.push({path: 'signup'});
+      this.$router.push('/signup/');
     },
   }
 }
 </script>
+
+</style>
