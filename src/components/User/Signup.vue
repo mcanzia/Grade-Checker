@@ -1,6 +1,6 @@
 <template>
   <v-app>
-  <v-toolbar app :clipped-left="clipped" color="teal lighten-2"></v-toolbar>
+  <v-toolbar app color="teal lighten-2"></v-toolbar>
   <v-container>
     <v-layout row v-if="error">
       <v-flex xs12 sm6 offset-sm3>

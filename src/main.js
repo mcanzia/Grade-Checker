@@ -31,7 +31,7 @@ new Vue({
       authDomain: 'grade-checker-mjcanzia.firebaseapp.com',
       databaseURL: 'https://grade-checker-mjcanzia.firebaseio.com',
       projectId: 'grade-checker-mjcanzia',
-      storageBucket: 'grade-checker-mjcanzia.appspot.com',
+      storageBucket: 'gs://grade-checker-mjcanzia.appspot.com',
     });
     this.$router.push('/signin')
     firebase.auth().onAuthStateChanged((user) => {

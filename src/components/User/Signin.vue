@@ -1,6 +1,6 @@
 <template>
   <v-app>
-   <v-toolbar app :clipped-left="clipped" color="teal lighten-2"></v-toolbar>
+   <v-toolbar app color="teal lighten-2"></v-toolbar>
   <v-container>
     <v-layout row v-if="error">
       <v-flex xs12 sm6 offset-sm3>
@@ -33,7 +33,7 @@
                   <v-flex sm1 class="hidden-xs-only">
                     <v-btn @click="onGoogleSignIn" class="blue white--text">Sign in with Google</v-btn>
                   </v-flex>
-                  <v-flex xs12 class="hidden-sm-and-up">
+                  <v-flex xs12 class="mr-3 hidden-sm-and-up">
                     <v-btn @click="onGoogleSignIn" class="blue white--text">Sign in with Google</v-btn>
                   </v-flex>
                 </v-layout>
